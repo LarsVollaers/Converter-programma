@@ -201,11 +201,6 @@ export function DownloaderView({
   return (
     <div className="grid flex-1 grid-cols-[minmax(0,2fr)_minmax(260px,1fr)] gap-4 overflow-hidden">
       <div className="flex min-h-0 flex-col gap-3">
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-200/80">
-          Alleen voor eigen gebruik — gebruik dit binnen de voorwaarden van
-          het platform waar je van downloadt. Spotify wordt bewust niet
-          ondersteund.
-        </div>
 
         <SearchBar
           source={source}

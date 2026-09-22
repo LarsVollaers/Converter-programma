@@ -8,7 +8,9 @@ use tauri_plugin_shell::process::CommandEvent;
 use tauri_plugin_shell::ShellExt;
 
 use crate::converter::{extract_embedded_ffmpeg, JobRegistry, EXTRACTED_FFMPEG};
-use crate::util::{extract_embedded_binary, sanitize_filename, unique_output_path};
+use crate::util::{sanitize_filename, unique_output_path};
+#[cfg(target_os = "windows")]
+use crate::util::extract_embedded_binary;
 
 /// yt-dlp is embedded the same way as ffmpeg: a single portable .exe, no
 /// separate install step. Unlike ffmpeg it needs occasional updates when

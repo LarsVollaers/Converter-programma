@@ -7,7 +7,9 @@ use tauri::{AppHandle, Emitter, State};
 use tauri_plugin_shell::process::{CommandChild, CommandEvent};
 use tauri_plugin_shell::ShellExt;
 
-use crate::util::{extract_embedded_binary, sanitize_filename, unique_output_path};
+use crate::util::{sanitize_filename, unique_output_path};
+#[cfg(target_os = "windows")]
+use crate::util::extract_embedded_binary;
 
 /// ffmpeg is embedded directly into this binary so the app is a single
 /// portable .exe with no loose files or installation required.

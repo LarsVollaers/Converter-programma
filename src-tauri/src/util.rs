@@ -2,7 +2,10 @@ use std::path::PathBuf;
 
 /// Extracts embedded binary bytes to a stable temp path, skipping the write
 /// if a file of the same size is already there. Shared by ffmpeg and yt-dlp
-/// so both can ship as a single embedded portable .exe.
+/// so both can ship as a single embedded portable .exe. Only called on
+/// Windows (the only platform with embedded binaries so far) — gated so it
+/// isn't flagged as dead code on macOS/Linux builds.
+#[cfg(target_os = "windows")]
 pub fn extract_embedded_binary(bytes: &[u8], name: &str) -> Result<PathBuf, String> {
     let dir = std::env::temp_dir().join("converter-app");
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
