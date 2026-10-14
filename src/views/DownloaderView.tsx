@@ -6,6 +6,7 @@ import { ResultsList } from "../components/downloader/ResultsList";
 import { PreviewPlayer } from "../components/downloader/PreviewPlayer";
 import { DownloadsHistoryPanel } from "../components/downloader/DownloadsHistoryPanel";
 import {
+  checkYtdlp,
   downloadMedia,
   onDownloadProgress,
   resolveStreamUrl,
@@ -60,8 +61,19 @@ export function DownloaderView({
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewLoadingId, setPreviewLoadingId] = useState<string | null>(null);
 
+  const [ytdlpStatus, setYtdlpStatus] = useState<"checking" | "ok" | "missing">(
+    "checking",
+  );
+
   useEffect(() => {
     setHistory(loadDownloadHistory());
+    if (!isTauri()) {
+      setYtdlpStatus("missing");
+      return;
+    }
+    checkYtdlp()
+      .then(() => setYtdlpStatus("ok"))
+      .catch(() => setYtdlpStatus("missing"));
   }, []);
 
   useEffect(() => {
@@ -119,7 +131,19 @@ export function DownloaderView({
 
   const handleDownload = useCallback(
     async (result: SearchResult) => {
-      if (!outputDir) return;
+      if (!outputDir) {
+        setDownloadJobs((prev) => [
+          ...prev.filter((j) => j.result.id !== result.id),
+          {
+            id: makeId(),
+            result,
+            status: "error",
+            percent: 0,
+            error: "Kies eerst een uitvoermap hierboven.",
+          },
+        ]);
+        return;
+      }
       const jobId = makeId();
       setDownloadJobs((prev) => [
         ...prev.filter((j) => j.result.id !== result.id),
@@ -201,6 +225,12 @@ export function DownloaderView({
   return (
     <div className="grid flex-1 grid-cols-[minmax(0,2fr)_minmax(260px,1fr)] gap-4 overflow-hidden">
       <div className="flex min-h-0 flex-col gap-3">
+        {ytdlpStatus === "missing" && (
+          <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs text-rose-300">
+            yt-dlp niet gevonden — installeer yt-dlp en zorg dat het in PATH
+            staat (zie README)
+          </div>
+        )}
 
         <SearchBar
           source={source}

@@ -7,7 +7,7 @@ use tauri::{AppHandle, Emitter, State};
 use tauri_plugin_shell::process::{CommandChild, CommandEvent};
 use tauri_plugin_shell::ShellExt;
 
-use crate::util::{sanitize_filename, unique_output_path};
+use crate::util::{find_tool, sanitize_filename, unique_output_path};
 #[cfg(target_os = "windows")]
 use crate::util::extract_embedded_binary;
 
@@ -89,9 +89,9 @@ fn ffmpeg_command(app: &AppHandle) -> Result<tauri_plugin_shell::process::Comman
     if let Ok(path) = EXTRACTED_FFMPEG.get_or_init(extract_embedded_ffmpeg) {
         return Ok(app.shell().command(path));
     }
-    which::which("ffmpeg")
+    find_tool("ffmpeg")
         .map(|path| app.shell().command(path))
-        .map_err(|_| {
+        .ok_or_else(|| {
             "ffmpeg niet gevonden (niet gebundeld en niet in PATH).".to_string()
         })
 }

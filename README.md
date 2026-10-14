@@ -1,4 +1,4 @@
-# Converter
+# Video to audio and downloader
 
 Desktop app (Windows, Linux, macOS) met twee tabbladen:
 
@@ -66,19 +66,41 @@ Copy-Item (Get-ChildItem "$env:TEMP\ffmpeg-extract" -Recurse -Filter "ffmpeg.exe
 ### yt-dlp (Downloaden-tab)
 
 Zelfde aanpak als ffmpeg: ingebakken op Windows, systeem-`yt-dlp` in PATH als
-fallback op macOS/Linux. Eenmalig ophalen:
+fallback op macOS/Linux — **dit moet je los installeren, naast ffmpeg**, de
+Downloaden-tab gebruikt een ander programma dan de Converter-tab:
+
+- macOS: `brew install yt-dlp`
+- Linux: `pip install -U yt-dlp` (of je distro's package, als die niet
+  verouderd is — yt-dlp update vaak)
+
+Windows, eenmalig ophalen om in te bakken:
 
 ```powershell
 Invoke-WebRequest -Uri "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" `
   -OutFile "src-tauri\binaries\yt-dlp-x86_64-pc-windows-msvc.exe"
 ```
 
+De Downloaden-tab toont een waarschuwing bovenaan als yt-dlp (ingebakken of
+in PATH) niet gevonden wordt — net als de ffmpeg-waarschuwing op de
+Converter-tab.
+
 > **yt-dlp veroudert sneller dan ffmpeg.** YouTube/SoundCloud passen
 > regelmatig dingen aan waar yt-dlp achteraan moet; een ingebakken versie kan
 > na verloop van tijd stoppen met werken. Haal dan gewoon de nieuwste
-> `yt-dlp.exe` opnieuw op met bovenstaand commando en bouw opnieuw. yt-dlp is
+> `yt-dlp.exe` opnieuw op met bovenstaand commando en bouw opnieuw (of
+> `brew upgrade yt-dlp` / `pip install -U yt-dlp` op macOS/Linux). yt-dlp is
 > Unlicense (public domain) — geen extra licentie-verplichtingen zoals bij
 > ffmpeg.
+>
+> **macOS/Linux PATH-valkuil:** een app die je vanuit Finder/de Dock opent
+> (dubbelklikken, niet vanuit Terminal) krijgt een beperkte `PATH` mee die
+> `/opt/homebrew/bin`, `/usr/local/bin` en `~/.local/bin` vaak niet bevat —
+> precies waar Homebrew/pip dingen installeren. Dat kan er zo uitzien alsof
+> de app iets niet vindt terwijl het "gewoon" geïnstalleerd is. De app zoekt
+> daarom, als `PATH` niks oplevert, ook zelf in die paar gebruikelijke mappen
+> (zie `find_tool` in `src-tauri/src/util.rs`); mocht dat nog steeds niet
+> werken, start de app dan eenmalig vanuit Terminal om te zien wat er precies
+> misgaat.
 >
 > **Bekende beperking:** sommige SoundCloud-tracks (met name officiële
 > label-previews) bieden alleen een korte preview-stream aan in plaats van
@@ -124,17 +146,18 @@ als Intel (`x86_64-apple-darwin`):
    **build-artifact** onderaan de workflow-run, per architectuur — downloaden
    en uitpakken.
 
-Op macOS gebruikt de app systeem-ffmpeg (niet ingebakken, zoals bij Windows):
+Op macOS gebruikt de app systeem-ffmpeg én systeem-yt-dlp (niet ingebakken,
+zoals bij Windows) — beide los installeren:
 
 ```bash
-brew install ffmpeg
+brew install ffmpeg yt-dlp
 ```
 
 > **Gatekeeper:** de build is niet Apple-signed/notarized, dus macOS
 > waarschuwt bij de eerste keer openen ("app is beschadigd" / "kan niet
 > worden geopend"). Klik met rechts op de app → **Open** → **Open** (in
 > plaats van dubbelklikken), of run eenmalig in Terminal:
-> `xattr -cr /pad/naar/Converter.app`
+> `xattr -cr "/pad/naar/Video to audio and downloader.app"`
 
 ## Functionaliteit
 

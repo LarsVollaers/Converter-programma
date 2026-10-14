@@ -8,7 +8,7 @@ use tauri_plugin_shell::process::CommandEvent;
 use tauri_plugin_shell::ShellExt;
 
 use crate::converter::{extract_embedded_ffmpeg, JobRegistry, EXTRACTED_FFMPEG};
-use crate::util::{sanitize_filename, unique_output_path};
+use crate::util::{find_tool, sanitize_filename, unique_output_path};
 #[cfg(target_os = "windows")]
 use crate::util::extract_embedded_binary;
 
@@ -37,9 +37,21 @@ fn ytdlp_command(app: &AppHandle) -> Result<tauri_plugin_shell::process::Command
     if let Ok(path) = EXTRACTED_YTDLP.get_or_init(extract_embedded_ytdlp) {
         return Ok(app.shell().command(path));
     }
-    which::which("yt-dlp")
+    find_tool("yt-dlp")
         .map(|path| app.shell().command(path))
-        .map_err(|_| "yt-dlp niet gevonden (niet gebundeld en niet in PATH).".to_string())
+        .ok_or_else(|| "yt-dlp niet gevonden (niet gebundeld en niet in PATH).".to_string())
+}
+
+#[tauri::command]
+pub async fn check_ytdlp(app: AppHandle) -> Result<String, String> {
+    let cmd = ytdlp_command(&app)?;
+    let output = cmd
+        .args(["--version"])
+        .output()
+        .await
+        .map_err(|e| e.to_string())?;
+    let text = String::from_utf8_lossy(&output.stdout);
+    Ok(text.lines().next().unwrap_or("yt-dlp").to_string())
 }
 
 #[derive(Serialize, Clone)]

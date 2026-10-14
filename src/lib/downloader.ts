@@ -8,6 +8,10 @@ export interface DownloadProgressPayload {
   status: "running" | "done" | "error";
 }
 
+export function checkYtdlp(): Promise<string> {
+  return invoke("check_ytdlp");
+}
+
 export function searchMedia(
   query: string,
   source: DownloadSource,

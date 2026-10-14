@@ -40,6 +40,33 @@ pub fn sanitize_filename(name: &str) -> String {
     }
 }
 
+/// Looks for a CLI tool on PATH first, then a handful of common install
+/// locations that `PATH` often doesn't include for a GUI app.
+///
+/// macOS (and to a lesser extent Linux) GUI apps launched from Finder/the
+/// dock inherit a minimal `PATH` (typically just `/usr/bin:/bin:/usr/sbin:/sbin`)
+/// — it does *not* include Homebrew's `/opt/homebrew/bin` (Apple Silicon) or
+/// `/usr/local/bin` (Intel), nor `pip --user`'s `~/.local/bin`. A tool can be
+/// correctly installed and still be invisible to `which::which` for exactly
+/// this reason, which looks to the user like the app can't find something
+/// that's clearly there.
+pub fn find_tool(name: &str) -> Option<PathBuf> {
+    if let Ok(path) = which::which(name) {
+        return Some(path);
+    }
+
+    let mut candidates: Vec<PathBuf> = vec![
+        PathBuf::from(format!("/opt/homebrew/bin/{}", name)),
+        PathBuf::from(format!("/usr/local/bin/{}", name)),
+        PathBuf::from(format!("/usr/bin/{}", name)),
+    ];
+    if let Some(home) = std::env::var_os("HOME") {
+        candidates.push(PathBuf::from(home).join(".local/bin").join(name));
+    }
+
+    candidates.into_iter().find(|p| p.exists())
+}
+
 /// Appends " (1)", " (2)", ... to the stem until the path doesn't collide
 /// with an existing file, so conversions/downloads never silently overwrite
 /// something.

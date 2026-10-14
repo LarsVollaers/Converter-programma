@@ -3,7 +3,7 @@ mod downloader;
 mod util;
 
 use converter::{cancel_job, check_ffmpeg, convert_file, JobRegistry};
-use downloader::{download_media, resolve_stream_url, search_media};
+use downloader::{check_ytdlp, download_media, resolve_stream_url, search_media};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -19,7 +19,8 @@ pub fn run() {
             cancel_job,
             search_media,
             resolve_stream_url,
-            download_media
+            download_media,
+            check_ytdlp
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

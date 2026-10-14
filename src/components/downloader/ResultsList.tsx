@@ -67,60 +67,67 @@ export function ResultsList({
         return (
           <div
             key={result.id}
-            className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-2.5 hover:border-white/10"
+            className="rounded-xl border border-white/5 bg-white/[0.02] p-2.5 hover:border-white/10"
           >
-            {result.thumbnail ? (
-              <img
-                src={result.thumbnail}
-                alt=""
-                className="h-11 w-11 flex-shrink-0 rounded-lg object-cover"
-              />
-            ) : (
-              <div className="h-11 w-11 flex-shrink-0 rounded-lg bg-white/5" />
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm text-white/90">{result.title}</p>
-              <p className="truncate text-[11px] text-white/40">
-                {result.uploader} · {formatDuration(result.durationSeconds)}
-                {viewCount ? ` · ${viewCount} views` : ""}
-                {likeCount ? ` · ${likeCount} likes` : ""}
-              </p>
+            <div className="flex items-center gap-3">
+              {result.thumbnail ? (
+                <img
+                  src={result.thumbnail}
+                  alt=""
+                  className="h-11 w-11 flex-shrink-0 rounded-lg object-cover"
+                />
+              ) : (
+                <div className="h-11 w-11 flex-shrink-0 rounded-lg bg-white/5" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm text-white/90">{result.title}</p>
+                <p className="truncate text-[11px] text-white/40">
+                  {result.uploader} · {formatDuration(result.durationSeconds)}
+                  {viewCount ? ` · ${viewCount} views` : ""}
+                  {likeCount ? ` · ${likeCount} likes` : ""}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onPreview(result)}
+                disabled={isPreviewLoading}
+                title="Voorluisteren"
+                className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border text-sm transition-colors ${
+                  isPreviewing
+                    ? "border-[#198754] bg-[#198754]/15 text-emerald-300"
+                    : "border-white/10 text-white/60 hover:bg-white/[0.06]"
+                }`}
+              >
+                {isPreviewLoading ? "…" : isPreviewing ? "⏸" : "▶"}
+              </button>
+              <button
+                type="button"
+                onClick={() => openUrl(result.webpageUrl)}
+                title="Open origineel"
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 text-sm text-white/60 hover:bg-white/[0.06]"
+              >
+                ⧉
+              </button>
+              <button
+                type="button"
+                onClick={() => onDownload(result)}
+                disabled={job?.status === "running" || job?.status === "done"}
+                className="flex-shrink-0 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {job?.status === "running"
+                  ? `${Math.round(job.percent)}%`
+                  : job?.status === "done"
+                    ? "Gedownload"
+                    : job?.status === "error"
+                      ? "Opnieuw"
+                      : "Downloaden"}
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => onPreview(result)}
-              disabled={isPreviewLoading}
-              title="Voorluisteren"
-              className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border text-sm transition-colors ${
-                isPreviewing
-                  ? "border-[#198754] bg-[#198754]/15 text-emerald-300"
-                  : "border-white/10 text-white/60 hover:bg-white/[0.06]"
-              }`}
-            >
-              {isPreviewLoading ? "…" : isPreviewing ? "⏸" : "▶"}
-            </button>
-            <button
-              type="button"
-              onClick={() => openUrl(result.webpageUrl)}
-              title="Open origineel"
-              className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 text-sm text-white/60 hover:bg-white/[0.06]"
-            >
-              ⧉
-            </button>
-            <button
-              type="button"
-              onClick={() => onDownload(result)}
-              disabled={job?.status === "running" || job?.status === "done"}
-              className="flex-shrink-0 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {job?.status === "running"
-                ? `${Math.round(job.percent)}%`
-                : job?.status === "done"
-                  ? "Gedownload"
-                  : job?.status === "error"
-                    ? "Opnieuw"
-                    : "Downloaden"}
-            </button>
+            {job?.status === "error" && job.error && (
+              <p className="mt-1.5 pl-[56px] text-[11px] text-rose-300/80">
+                {job.error}
+              </p>
+            )}
           </div>
         );
       })}

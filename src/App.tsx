@@ -44,7 +44,9 @@ export default function App() {
     <div className="flex h-screen flex-col gap-4 p-5">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-white">Converter</h1>
+          <h1 className="text-lg font-semibold text-white">
+            Video to audio and downloader
+          </h1>
           <p className="text-xs text-white/40">
             {activeTab === "converter"
               ? "Video en audio converteren naar MP3, WAV of FLAC"
